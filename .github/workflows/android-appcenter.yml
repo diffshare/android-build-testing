@@ -1,5 +1,7 @@
-name: Android CI Build
-on: [push, pull_request]
+name: Android distribute to AppCenter
+on:
+  push:
+    branches: [master]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,15 +21,24 @@ jobs:
       - name: Prepare Gradle
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.jks
-      - name: Test with Gradle
-        run: ./gradlew test
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       - name: Build with Gradle
         run: ./gradlew assembleRelease
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Get apk path
+        id: apk-path
+        run: |
+          path=$(find **/build/outputs/apk -name '*.apk' -type f | head -1)
+          echo "::set-output name=path::$path"
+      - name: upload artefact to App Center
+        uses: wzieba/AppCenter-Github-Action@v1
+        with:
+          appName: ${{secrets.APP_CENTER_APP_NAME}}
+          token: ${{secrets.APP_CENTER_TOKEN}}
+          group: Collaborators
+          file: ${{ steps.apk-path.outputs.path }}
+          gitReleaseNotes: true
+          notifyTesters: true
+          debug: false
