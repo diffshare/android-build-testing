@@ -19,8 +19,19 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            storeFile rootProject.file('release.jks')
+            storePassword env.fetch('KEYSTORE_PASSWORD')
+            keyAlias env.fetch('KEY_ALIAS')
+            keyPassword env.fetch('KEY_PASSWORD')
+        }
+    }
     buildTypes {
         release {
+            if (rootProject.file('release.jks').exists()) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
