@@ -31,3 +31,13 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      - name: Get apk path
+        id: apk-path
+        run: |
+          path=$(find **/build/outputs/apk -name '*.apk' -type f | head -1)
+          echo "::set-output name=path::$path"
+      - name: Upload apk file
+        uses: actions/upload-artifact@v1
+        with:
+          name: apk
+          path: ${{ steps.apk-path.outputs.path }}
