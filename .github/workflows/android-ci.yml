@@ -41,3 +41,13 @@ jobs:
         with:
           name: apk
           path: ${{ steps.apk-path.outputs.path }}
+      - name: upload artefact to App Center
+        uses: wzieba/AppCenter-Github-Action@v1
+        with:
+          appName: ${{secrets.APP_CENTER_APP_NAME}}
+          token: ${{secrets.APP_CENTER_TOKEN}}
+          group: Collaborators
+          file: ${{ steps.apk-path.outputs.path }}
+          gitReleaseNotes: true
+          notifyTesters: true
+          debug: false
